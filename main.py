@@ -23,11 +23,14 @@ app = FastAPI(title="Sentinel AI - Federated Fraud Detection")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # replace with frontend URL in production
-    allow_credentials=False,      # MUST be False if using "*"
+    allow_origins=[
+        "https://<cydb-frontend>.azurestaticapps.net","*"
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # -----------------------------------------------------------------------------
 # DATABASE
@@ -230,9 +233,15 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            await asyncio.sleep(1)
+            try:
+                # Keep connection alive (Azure-friendly)
+                await asyncio.wait_for(websocket.receive_text(), timeout=30)
+            except asyncio.TimeoutError:
+                # Heartbeat every 30s so Azure doesn't kill it
+                await websocket.send_json({"type": "heartbeat"})
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
 
 # =============================================================================
 # BACKGROUND TASK
