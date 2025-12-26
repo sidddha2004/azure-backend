@@ -24,12 +24,13 @@ app = FastAPI(title="Sentinel AI - Federated Fraud Detection")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://<cydb-frontend>.azurestaticapps.net","*"
+        "https://cydb-frontend.azurestaticapps.net"
     ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # -----------------------------------------------------------------------------
